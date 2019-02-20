@@ -1,0 +1,49 @@
+header{
+    padding-top: 30px;
+    padding-bottom: 30px;
+    color: #1C1933;
+    font: 16pt Arial;
+    text-align: center;
+}
+
+footer{
+    padding-top: 30px;
+    padding-bottom: 30px;
+    color: #1C1933;
+    font: 16pt Arial;
+    text-align: center;
+}
+
+body{
+    margin: 0;
+    padding: 0;
+    background-color: #FFF7EA;
+}
+
+ol{
+    margin-top: 14pt;
+    margin-bottom: 14pt;
+}
+
+ul{
+    margin-top: 14pt;
+    margin-bottom: 14pt;
+}
+
+#canvas_holder {
+    width: 100%;
+    text-align: center;
+}
+
+.content {
+    width: 70%;
+    margin-left: 15%;
+    font: 12pt/1.5 Arial;
+    border-bottom: #FF800C 1px solid;
+}
+.content h1{
+    text-align: center;
+    font: 16pt Arial;
+    font-weight: bold;
+    color: #1C1933;
+}

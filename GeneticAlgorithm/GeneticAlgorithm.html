@@ -1,0 +1,173 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Genetic Algorithm</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.js"></script> -->
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+        <script src="variables.js"></script>
+        <script src="playButton.js"></script>
+        <script src="draggable.js"></script>
+        <script src="population.js"></script>
+        <script src="player.js"></script>
+        <script src="brain.js"></script>
+        <script src="goal.js"></script>
+        <script src="projectile.js"></script>
+        <script src="speedController.js"></script>
+        <script src="populationController.js"></script>
+    </head>
+    <body>
+        <header>Build your own map and then see the genetic algorithm learn to move a square from a starting point to a goal while avoiding obstacles.</header>
+        <section id="canvas_holder"></section>
+        <script src="world.js"></script>
+        <section class="content">
+            <h1 id="instructions">Instructions</h1>
+                <p>
+                    Follow the instructions below to set-up your map and run the algorithm. 
+                    For this web-page, a <b>path</b> refers to a sequence of steps (directions) that a square takes (follows) in an attempt to travel from the starting point to a goal while avoiding the obstacles.
+                </p>
+                <ol>
+                    <li>
+                        <b>Choose a Starting Point</b>
+                        <p>
+                            Drag (click and hold) the green "Starting Point" square from the selection panel (the left rectangle with light green background) and drop (release hold) it anywhere on the play area (the right rectangle with white background).
+                            Once on the play area, it can be dragged and dropped to new locations. 
+                            Dropping it off the play area will reset it to the selection panel.
+                        </p>
+                    </li>
+                    <li>
+                        <b>Add Goals</b>
+                        <p>
+                            Drag the purple "Goal" square from the selection panel and drop it anywhere on the play area. 
+                            This can be done multiple times to create multiple goals.
+                            The algorithm will try to learn how to move a square from the starting point to one of these goals.
+                            Once on the play area, a goal can be dragged and dropped to new locations.
+                            Dropping it off the play area will delete it.
+                        </p>
+                    </li>
+                    <li>
+                        <b>Add Obstacles</b>
+                        <p>
+                            You can create multiple obstacles for squares to avoid while they move from the starting point to a goal. 
+                            An obstacle can either be stationary or moving. 
+                            Moving obstacles will bounce off the play area boundary during runtime.
+                            To add an obstacle, first choose a position by dragging the orange "Obstacle" circle from the selection panel and drop it anywhere on the play area.
+                            Then either click inside the obstacle (a black circle will appear) to make it stationary or click outside of the obstacle (an arrow will appear that indicates the direction it will move in) to make it move during runtime.
+                            Once on the play area, an obstacle can be moved to new locations.
+                            Dropping it off the play area will delete it.
+                        </p>
+                    </li>
+                    <li>
+                        <b>Run the Genetic Algorithm</b>
+                        <p>
+                            Once you have set-up the play area, click the play button at the top of the selection panel to begin the algorithm.
+                            While the algorithm is running, you can monitor what <b>generation</b> it is up to. 
+                            You can think of this as the number of attempts the algorithm has made to find or improve a path that ends at a goal. 
+                            Within each generation, the best path is traced by a red square, while all other paths are traced by green squares. 
+                            If a square runs into an obstacle or the play area boundary, then it stops and turns light blue.
+                            Before the algorithm has found a path that ends at a goal, you can monitor the "Max Steps" (which will increase by 2 every 2 generations). 
+                            The algorithm is trying to find a path, that ends at a goal, that has at most the "Max Steps" number of steps. 
+                            After the algorithm has found a path that ends at a goal, it will then try to find another path that ends at a goal with a reduced number of steps, where the current record number of steps is shown beside "Best Steps".
+                            While the algorithm is running, under "Controls" you can change the speed at which the algorithm runs. 
+                            For example, you can speed it up so that it finds a path, that ends at a goal, quicker and then slow it down to see details of how squares move along generated paths.
+                            Also, under "Controls" you can change the population size. 
+                            This number is how many paths the algorithm tries per generation.
+                            You can click the stop button, at the top of the selection panel, to stop the algorithm and make modifications to the map.
+                        </p>
+                    </li>
+                </ol>
+        </section>
+        <section class="content">
+            <h1 id="how">How the Algorithm Works</h1>
+            <p>
+                This program uses a <b>genetic algorithm</b> to find, and then improve, a path that ends at a goal. 
+                A genetic algorithm mimics biological evolution, in that it is based on natural selection. 
+                An outline of how the algorithm solves the problem is described below.
+                <ol>
+                    <li>
+                        <p>
+                            When you click the play button, the algorithm first generates several completely random paths (paths with random directions). 
+                            The number of said paths and the number of steps in these paths are shown under "Population" and beside "Max Steps", respectively, in the selection panel during runtime.
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            The algorithm then decides how good each of the generated paths are by assigning each of them their own <b>fitness score</b>. 
+                            The aim of this fitness score is to summarise, as a single number, how close a path is to achieving the goal, i.e., moving a square from the starting point to a goal while avoiding the obstacles. 
+                            The fitness score is decided by a <b>fitness function</b>. 
+                            Such a function inputs one or more pieces of data and computes a fitness score.
+                            Designing a fitness function is arguably the most difficult and subjective part of building a genetic algorithm. 
+                            For example, what defines the best path out of a group of paths and is this rule the best for all map designs?
+                            Another difficulty is to choose what data the fitness function has access to. 
+                            In reality, there may be physical restrictions that limit the choices of input data. 
+                            Whereas, in this artificial set-up the input data could be almost anything. 
+                            For example, we could allow the algorithm to know the exact location of all goals and obstacles at all times; however, this would not offer much of a challenge. 
+                        </p>
+                        <p>
+                            To make things reasonably difficult, the genetic algorithm used only knows:
+                            <ul>
+                                <li>
+                                    The <b>distance</b> to the nearest goal at all times, but not where this goal is.
+                                </li>
+                                <li>
+                                    The <b>displacement</b> a path makes, i.e., how far a square is from the starting point after it has moved along a path.
+                                </li>
+                                <li>
+                                    When a square, moving along a path, runs into an obstacle, a goal or the boundary of the play area. 
+                                    It does not know where the obstacles, goals or boundary are, and does not know if the square is going to run into them until it does.
+                                </li>
+                            </ul>
+                            Using this data, the algorithm determines the fitness score of a path as follows (where a larger number is given to better paths):
+                            <ul>
+                                <li>
+                                    If a path does not cause a square, moving along this path, to run into an obstacle or the play area boundary, then this path is assigned the fitness score:
+                                    $${\text{displacement} \over \text{distance}^2}.$$
+                                    The closer the path takes the square to a goal then the higher its score will be. 
+                                    Also, the larger the displacement the higher its score will be, which further encourages the path to not allow the square to stay still initially. 
+                                    The distance is squared to give it priority over displacement, which encourages the path to lead to the closest goal.
+                                </li>
+                                <li>
+                                    If a path causes a square, moving along this path, to run into an obstacle or the play area boundary, then this path is assigned the fitness score:
+                                    $$0.1 \times {\text{displacement} \over \text{distance}^2}.$$
+                                    This score is considerably smaller than the score associated to a path not running into an obstacle or the play area boundary, as such a path will never allow the square to make it to a goal.
+                                </li>
+                                <li>
+                                    If a path causes a square, moving along this path, to make it to a goal while not running into an obstacle or the play area boundary, then this path is assigned the fitness score:
+                                    $${\text{displacement} \over \text{distance}^2} + {100000 \over \text{steps}^2}.$$
+                                    This score is the highest a path can achieve, which reflects how the best paths are those that end at a goal.
+                                    In this score "steps" refers to how many steps is in the path. 
+                                    If the algorithm continues running, it will try to find paths, that end at a goal, that increase this score by reducing the number of steps.
+                                </li>
+                            </ul>
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            The algorithm then creates a new generation/group of paths, based on the previous generation of paths. 
+                            The new generation number, number of new paths and the number of steps in these paths are shown beside "Generation", under "Population" and beside "Max Steps"/"Best Steps", respectively, in the selection panel during runtime.
+                            The way the algorithm creates the new generation of paths is as follows:
+                            <ol type="i">
+                                <li>
+                                    The best performing path (the path with the highest fitness score) from the previous generation is copied over to the new generation of paths.
+                                </li>
+                                <li>
+                                    The remaining paths are first copied from randomly selected paths in the previous generation (with weight/preference given to the best performing paths) and are then <b>mutated</b>. 
+                                    For this algorithm, a path mutation is when the algorithm goes through each direction in the path and with a 1% probability changes that direction to a random direction. 
+                                    However, if a path causes a square, moving along that path, to run into an obstacle or the play area boundary in the last 10 steps, then the last 10 directions of the path have a 5% chance of changing.
+                                    The reason for this is that such a path has done well to make it so far and it is the recent steps that are causing it to fail.
+                                </li>
+                            </ol>
+                            The best performing path from the previous generation is unmodified to act as a control/baseline for the new generation of paths to beat. 
+                            This path is traced by the red square during runtime.
+                            Over time, mutations allow the best paths to evolve and improve. 
+                            This is reminiscent of biological evolution.
+                            With the paths created for this generation, the algorithm returns to step 2.
+                        </p>
+                    </li>
+                </ol>
+            </p>
+        </section>
+        <footer></footer>
+    </body>
+</html>
