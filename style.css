@@ -36,7 +36,7 @@ header li{
 }
 
 header a:hover{
-    color: #FF800C;
+    color: #1C1933;
     font-weight: bold;
 }
 
@@ -56,7 +56,7 @@ header a:hover{
     width: 70%;
     margin-left: 15%;
     font: 12pt/1.5 Arial;
-    border-bottom: #FF800C 1px solid;
+    border-bottom: #1C1933 1px solid;
 }
 .content h1{
     text-align: center;
